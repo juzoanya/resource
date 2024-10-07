@@ -1,0 +1,143 @@
+version: '3.8'
+services:
+
+  deadline-db:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: dockerfile
+      target: db
+      args:
+        - DEADLINE_VERSION=$DEADLINE_VERSION
+        - DEADLINE_INSTALLER_BASE=$DEADLINE_INSTALLER_BASE
+        - SECRETS_USERNAME=$SECRETS_USERNAME
+        - SECRETS_PASSWORD=$SECRETS_PASSWORD
+        - DB_CERT_PASS=$DB_CERT_PASS
+        - DB_HOST=$DB_HOST
+        - CERT_ORG=$CERT_ORG
+        - CERT_OU=$CERT_OU
+    volumes:
+      - certs:/client_certs
+      - repo:/repo
+      - db_data:/opt/Thinkbox/DeadlineDatabase10/mongo/data
+    ports:
+      - 27100:27100
+
+  deadline-rcs:
+    depends_on:
+      - deadline-db
+    restart: unless-stopped
+    hostname: deadline-rcs.$ROOT_DOMAIN
+    build:
+      context: .
+      dockerfile: dockerfile
+      target: client
+      args:
+        - DEADLINE_VERSION=$DEADLINE_VERSION
+        - DEADLINE_INSTALLER_BASE=$DEADLINE_INSTALLER_BASE
+    <<: &default
+      image: postwork/deadline-client
+      environment:
+        - DEADLINE_INSTALLER_BASE=$DEADLINE_INSTALLER_BASE
+        - DEADLINE_VERSION=$DEADLINE_VERSION
+        - RCS_HTTP_PORT=$RCS_HTTP_PORT
+        - USE_RCS_TLS=$USE_RCS_TLS
+        - RCS_TLS_PORT=$RCS_TLS_PORT
+        - RCS_CERT_PASS=$RCS_CERT_PASS
+        - DB_CERT_PASS=$DB_CERT_PASS
+        - SECRETS_USERNAME=$SECRETS_USERNAME
+        - SECRETS_PASSWORD=$SECRETS_PASSWORD
+        - DB_HOST=$DB_HOST
+        - USE_WEBSERVICE=$USE_WEBSERVICE
+        - USE_LICENSE_FORWARDER=$USE_LICENSE_FORWARDER
+    command: rcs
+    volumes:
+      - certs:/client_certs
+      - server_certs:/server_certs
+      - repo:/repo
+      - installers:/installers
+    ports:
+      - 4433:4433
+      - 8888:8888
+
+  deadline-web:
+    depends_on:
+      - deadline-db
+      - deadline-rcs
+    restart: on-failure
+    <<: *default
+    command: webservice
+    hostname: deadline-web.$ROOT_DOMAIN
+    volumes:
+      - certs:/client_certs
+      - repo:/repo
+    ports:
+      - 8081:8081
+
+  deadline-forwarder:
+    depends_on:
+      - deadline-db
+      - deadline-rcs
+    restart: on-failure
+    <<: *default
+    command: forwarder
+    hostname: deadline-forwarder.$ROOT_DOMAIN
+    volumes:
+      - certs:/client_certs
+      - repo:/repo
+    ports:
+      - 17004:17004
+      - 17005:17005
+      - 443:443
+      - 4101:4101
+      - 6101:6101
+      - 5060:5060
+
+
+  # deadline-zt-forwarder:
+  #   depends_on:
+  #     - deadline-db
+  #     - deadline-rcs
+  #   restart: unless-stopped
+  #   <<: *default
+  #   command: zt-forwarder
+  #   environment:
+  #     - DEADLINE_VERSION=$DEADLINE_VERSION
+  #     - RCS_HTTP_PORT=$RCS_HTTP_PORT
+  #     - RCS_TLS_PORT=$RCS_TLS_PORT
+  #     - RCS_CERT_PASS=$RCS_CERT_PASS
+  #     - DB_CERT_PASS=$DB_CERT_PASS
+  #     - SECRETS_USERNAME=$SECRETS_USERNAME
+  #     - SECRETS_PASSWORD=$SECRETS_PASSWORD
+  #     - ZT_NETWORK_ID=$ZT_NETWORK_ID
+  #   hostname: deadline-zt-forwarder.$ROOT_DOMAIN
+  #   volumes:
+  #     - certs:/client_certs
+  #     - repo:/repo
+  #   ports:
+  #     - 9994:9994
+  #   cap_add:
+  #    - NET_ADMIN
+  #    - SYS_ADMIN
+  #   devices:
+  #     - "/dev/net/tun"
+
+
+  filebrowser:
+    image: filebrowser/filebrowser
+    restart: unless-stopped
+    volumes:
+      - repo:/srv/repo
+      - certs:/srv/certs
+      - installers:/srv/installers
+    ports:
+      - 8080:80
+
+
+
+volumes:
+  db_data:
+  certs:
+  server_certs:
+  repo:
+  installers:
