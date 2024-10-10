@@ -66,9 +66,9 @@ FROM base as client
 ARG DEADLINE_VERSION
 ARG DEADLINE_INSTALLER_BASE
 
-
+COPY ./Deadline-10.3.2.1-linux-installers.tar .
 RUN pip install awscli
-RUN aws s3 cp --region us-west-2 --no-sign-request s3://thinkbox-installers/${DEADLINE_INSTALLER_BASE}-linux-installers.tar Deadline-${DEADLINE_VERSION}-linux-installers.tar
+#RUN aws s3 cp --region us-west-2 --no-sign-request s3://thinkbox-installers/${DEADLINE_INSTALLER_BASE}-linux-installers.tar Deadline-${DEADLINE_VERSION}-linux-installers.tar
 RUN tar -xvf Deadline-${DEADLINE_VERSION}-linux-installers.tar
 
 RUN mkdir ~/certs
