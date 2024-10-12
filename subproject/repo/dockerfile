@@ -1,0 +1,26 @@
+# Dockerfile for Deadline Repository
+FROM ubuntu:20.04
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download the Deadline Repository installer
+RUN wget https://downloads.thinkboxsoftware.com/DeadlineRepository-<version>.linux \
+    -O /tmp/deadline-repo-installer.run && \
+    chmod +x /tmp/deadline-repo-installer.run
+
+# Install Deadline Repository non-interactively
+RUN /tmp/deadline-repo-installer.run --mode unattended --dbtype mongo \
+    --dbhost mongo --dbport 27017 --dbuser admin --dbpassword password
+
+# Expose required ports
+EXPOSE 8080 4433
+
+# Volumes for persistent storage of the repository
+VOLUME ["/opt/Thinkbox/DeadlineRepository10"]
+
+# Command to start the repository server
+CMD ["/etc/init.d/deadline-repository start"]
