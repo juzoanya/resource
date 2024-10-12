@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Download the Deadline Repository installer
-RUN wget https://downloads.thinkboxsoftware.com/DeadlineRepository-<version>.linux \
+RUN wget https://thinkbox-installers.s3.us-west-2.amazonaws.com/Releases/Deadline/10.3/7_10.3.2.1/Deadline-10.3.2.1-linux-installers.tar \
     -O /tmp/deadline-repo-installer.run && \
     chmod +x /tmp/deadline-repo-installer.run
 
