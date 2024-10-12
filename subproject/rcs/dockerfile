@@ -1,0 +1,25 @@
+# Dockerfile for Deadline Remote Connection Server
+FROM ubuntu:20.04
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and install Deadline RCS
+RUN wget https://downloads.thinkboxsoftware.com/DeadlineClient-<version>.linux \
+    -O /tmp/deadline-rcs-installer.run && \
+    chmod +x /tmp/deadline-rcs-installer.run
+
+RUN /tmp/deadline-rcs-installer.run --mode unattended --installto /opt/Thinkbox/Deadline10
+
+# Copy the SSL certificates into the container
+COPY ./certs/rcs.crt /opt/Thinkbox/Deadline10/certs/rcs.crt
+COPY ./certs/rcs.key /opt/Thinkbox/Deadline10/certs/rcs.key
+
+# Expose required RCS ports
+EXPOSE 4433 8080
+
+# Command to start the Deadline RCS with SSL certificates
+CMD ["/opt/Thinkbox/Deadline10/bin/deadlinercs", "--sslCertificate=/opt/Thinkbox/Deadline10/certs/rcs.crt", "--sslPrivateKey=/opt/Thinkbox/Deadline10/certs/rcs.key"]
