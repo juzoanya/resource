@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+  mongo:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    container_name: deadline_mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - ./mongo_data:/data/db
+    networks:
+      - deadline_network
+    ports:
+      - "27017:27017"
+
+  deadline_repository:
+    build:
+      context: ./repo
+      dockerfile: Dockerfile
+    container_name: deadline_repository
+    volumes:
+      - ./deadline_repo:/opt/Thinkbox/DeadlineRepository10
+    depends_on:
+      - mongo
+    networks:
+      - deadline_network
+    ports:
+      - "8080:8080"
+      - "4433:4433"
+
+  deadline_rcs:
+    build:
+      context: ./rcs
+      dockerfile: Dockerfile
+    container_name: deadline_rcs
+    volumes:
+      - ./deadline_rcs:/opt/Thinkbox/Deadline10
+      - ./certs:/opt/Thinkbox/Deadline10/certs  # Mount the certificate directory
+    depends_on:
+      - deadline_repository
+    networks:
+      - deadline_network
+    ports:
+      - "4433:4433"
+      - "8080:8080"
+
+  deadline_webservice:
+    build:
+      context: ./webservice
+      dockerfile: Dockerfile
+    container_name: deadline_webservice
+    volumes:
+      - ./deadline_webservice:/opt/Thinkbox/Deadline10
+    depends_on:
+      - deadline_repository
+    networks:
+      - deadline_network
+    ports:
+      - "8082:8082"
+
+networks:
+  deadline_network:
+    driver: bridge
