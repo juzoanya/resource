@@ -16,15 +16,15 @@ RUN apt-get update && apt-get install -y \
 COPY ../DeadlineRepository-10.3.2.1-linux-x64-installer.run /tmp/deadline-repo-installer.run
 RUN chmod +x /tmp/deadline-repo-installer.run
 
-# Install Deadline Repository non-interactively
-RUN /tmp/deadline-repo-installer.run --mode unattended --dbtype MongoDB \
-    --dbhost db --dbport 27017 --dbuser admin --dbpassword password
-
 # Expose required ports
 EXPOSE 8080 4433
 
 # Volumes for persistent storage of the repository
 VOLUME ["/opt/Thinkbox/DeadlineRepository10"]
 
-# Command to start the repository server
-CMD ["/etc/init.d/deadline-repository start"]
+# Create an entrypoint script to install the Deadline Repository at runtime
+COPY ./repo/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Command to start the entrypoint script
+CMD ["/entrypoint.sh"]
