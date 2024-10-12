@@ -1,0 +1,14 @@
+# Dockerfile for MongoDB
+FROM mongo:4.4
+
+# Set environment variables for MongoDB
+ENV MONGO_INITDB_ROOT_USERNAME=admin
+ENV MONGO_INITDB_ROOT_PASSWORD=password
+
+# Expose default MongoDB port
+EXPOSE 27017
+
+# Volumes for persistent data
+VOLUME ["/data/db"]
+
+CMD ["mongod"]
