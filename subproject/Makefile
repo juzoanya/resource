@@ -4,7 +4,6 @@ URL = https://thinkbox-installers.s3.us-west-2.amazonaws.com/Releases/Deadline/1
 all: build
 
 build:
-	@$(FILE):
 	@if [ ! -f $(FILE) ]; then \
 		echo "File not found. Downloading..."; \
 		wget $(URL); \

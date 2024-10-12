@@ -1,19 +1,19 @@
 all: build
 
 build:
-        @docker compose build
+	@docker compose build
 
 start:
-        @docker compose up
+	@docker compose up
 
 stop:
-        @docker compose down
+	@docker compose down
 
 restart: stop run
 
 clean: stop
-        @docker compose down -v
-        @docker compose down --rmi all
+	@docker compose down -v
+	@docker compose down --rmi all
 
 re: clean all
 

@@ -1,8 +1,7 @@
 services:
   mongo:
     build:
-      context: ./db
-      dockerfile: Dockerfile
+      dockerfile: ./db/Dockerfile
     container_name: deadline_mongo
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
@@ -16,8 +15,7 @@ services:
 
   deadline_repository:
     build:
-      context: ./repo
-      dockerfile: Dockerfile
+      dockerfile: ./repo/Dockerfile
     container_name: deadline_repository
     volumes:
       - ./deadline_repo:/opt/Thinkbox/DeadlineRepository10
@@ -31,8 +29,7 @@ services:
 
   deadline_rcs:
     build:
-      context: ./rcs
-      dockerfile: Dockerfile
+      dockerfile: ./rcs/Dockerfile
     container_name: deadline_rcs
     volumes:
       - ./deadline_rcs:/opt/Thinkbox/Deadline10
@@ -47,8 +44,7 @@ services:
 
   deadline_webservice:
     build:
-      context: ./webservice
-      dockerfile: Dockerfile
+      dockerfile: ./webservice/Dockerfile
     container_name: deadline_webservice
     volumes:
       - ./deadline_webservice:/opt/Thinkbox/Deadline10

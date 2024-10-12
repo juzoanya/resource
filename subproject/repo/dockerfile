@@ -8,13 +8,17 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Download the Deadline Repository installer
-RUN wget https://thinkbox-installers.s3.us-west-2.amazonaws.com/Releases/Deadline/10.3/7_10.3.2.1/Deadline-10.3.2.1-linux-installers.tar \
-    -O /tmp/deadline-repo-installer.run && \
-    chmod +x /tmp/deadline-repo-installer.run
+# RUN wget https://thinkbox-installers.s3.us-west-2.amazonaws.com/Releases/Deadline/10.3/7_10.3.2.1/Deadline-10.3.2.1-linux-installers.tar \
+#     -O /tmp/deadline-repo-installer.run && \
+#     chmod +x /tmp/deadline-repo-installer.run
+
+# Copy installer file
+COPY ../DeadlineRepository-10.3.2.1-linux-x64-installer.run /tmp/deadline-repo-installer.run
+RUN chmod +x /tmp/deadline-repo-installer.run
 
 # Install Deadline Repository non-interactively
-RUN /tmp/deadline-repo-installer.run --mode unattended --dbtype mongo \
-    --dbhost mongo --dbport 27017 --dbuser admin --dbpassword password
+RUN /tmp/deadline-repo-installer.run --mode unattended --dbtype MongoDB \
+    --dbhost db --dbport 27017 --dbuser admin --dbpassword password
 
 # Expose required ports
 EXPOSE 8080 4433
