@@ -1,8 +1,8 @@
 services:
-  mongo:
+  db:
     build:
       dockerfile: ./db/Dockerfile
-    container_name: deadline_mongo
+    container_name: deadline_db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -13,21 +13,21 @@ services:
     ports:
       - "27017:27017"
 
-  deadline_repository:
+  repo:
     build:
       dockerfile: ./repo/Dockerfile
-    container_name: deadline_repository
+    container_name: deadline_repo
     volumes:
       - ./deadline_repo:/opt/Thinkbox/DeadlineRepository10
     depends_on:
-      - mongo
+      - db
     networks:
       - deadline_network
     ports:
       - "8080:8080"
       - "4433:4433"
 
-  deadline_rcs:
+  rcs:
     build:
       dockerfile: ./rcs/Dockerfile
     container_name: deadline_rcs
@@ -35,21 +35,21 @@ services:
       - ./deadline_rcs:/opt/Thinkbox/Deadline10
       - ./certs:/opt/Thinkbox/Deadline10/certs  # Mount the certificate directory
     depends_on:
-      - deadline_repository
+      - repo
     networks:
       - deadline_network
     ports:
       - "4433:4433"
       - "8080:8080"
 
-  deadline_webservice:
+  web:
     build:
       dockerfile: ./webservice/Dockerfile
-    container_name: deadline_webservice
+    container_name: deadline_web
     volumes:
       - ./deadline_webservice:/opt/Thinkbox/Deadline10
     depends_on:
-      - deadline_repository
+      - repo
     networks:
       - deadline_network
     ports:
