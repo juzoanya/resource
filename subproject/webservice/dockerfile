@@ -1,0 +1,24 @@
+# Dockerfile for Deadline Web Service
+FROM ubuntu:20.04
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and install Deadline Web Service
+RUN wget https://downloads.thinkboxsoftware.com/DeadlineClient-<version>.linux \
+    -O /tmp/deadline-web-installer.run && \
+    chmod +x /tmp/deadline-web-installer.run
+
+RUN /tmp/deadline-web-installer.run --mode unattended --installto /opt/Thinkbox/Deadline10
+
+# Expose required web ports
+EXPOSE 8082
+
+# Volumes for persistent configuration
+VOLUME ["/opt/Thinkbox/Deadline10"]
+
+# Start the Deadline Web Service
+CMD ["/opt/Thinkbox/Deadline10/bin/deadlinewebservice"]
