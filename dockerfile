@@ -13,11 +13,23 @@ ENV TZ=Europe/Berlin
 
 WORKDIR /build
 
-RUN apt-get update && apt-get install -y curl dos2unix python3 python3-pip git tzdata locales &&\
-    ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime &&\
-    dpkg-reconfigure --frontend noninteractive tzdata
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    curl dos2unix python3 python3-pip git tzdata locales &&\
+    rm -rf /var/lib/apt/lists/*
 
+# Configure the timezone
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
 
+# Configure locales: generate both German and English locales
+RUN locale-gen en_US.UTF-8 de_DE.UTF-8 && \
+    update-locale LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
+
+# Set environment variables for language and locale
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 
 FROM base AS db
