@@ -14,7 +14,7 @@ FROM ubuntu:20.04 AS base
 WORKDIR /build
 
 RUN apt-get update && \
-    apt-get install -y curl dos2unix python3 python3-pip git debconf_utils
+    apt-get install -y curl dos2unix python3 python3-pip git debconf-utils
     # rm -rf /var/lib/apt/lists/*
 
 # # Configure the timezone
@@ -94,7 +94,7 @@ RUN tar -xvf Deadline-${DEADLINE_VERSION}-linux-installers.tar
 RUN mkdir ~/certs
 
 
-RUN apt-get install -y lsb-core
+RUN apt-get install -y lsb-core netcat
 
 ADD ./client_entrypoint.sh .
 RUN dos2unix ./client_entrypoint.sh && chmod u+x ./client_entrypoint.sh

@@ -71,7 +71,6 @@ download_additional_installers () {
     wait
 }
 
-echo "PERFORMING CLEANUP..."
 
 cleanup_installer () {
     rm /build/Deadline*
