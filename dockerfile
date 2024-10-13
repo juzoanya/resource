@@ -9,27 +9,26 @@ ARG CERT_OU
 
 FROM ubuntu:20.04 AS base
 
-ENV TZ=Europe/Berlin
+# ENV TZ=Europe/Berlin
 
 WORKDIR /build
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    curl dos2unix python3 python3-pip git tzdata locales &&\
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y curl dos2unix python3 python3-pip git debconf_utils
+    # rm -rf /var/lib/apt/lists/*
 
-# Configure the timezone
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
-    echo $TZ > /etc/timezone
+# # Configure the timezone
+# RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+#     echo $TZ > /etc/timezone
 
-# Configure locales: generate both German and English locales
-RUN locale-gen en_US.UTF-8 de_DE.UTF-8 && \
-    update-locale LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
+# # Configure locales: generate both German and English locales
+# RUN locale-gen en_US.UTF-8 de_DE.UTF-8 && \
+#     update-locale LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 
-# Set environment variables for language and locale
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8
+# # Set environment variables for language and locale
+# ENV LANG=en_US.UTF-8
+# ENV LANGUAGE=en_US:en
+# ENV LC_ALL=en_US.UTF-8
 
 
 FROM base AS db
@@ -79,8 +78,12 @@ ENTRYPOINT [ "./database_entrypoint.sh" ]
 
 FROM base AS client
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 ARG DEADLINE_VERSION
 ARG DEADLINE_INSTALLER_BASE
+
+
 
 COPY ./Deadline-10.3.2.1-linux-installers.tar .
 RUN pip install awscli
@@ -90,7 +93,7 @@ RUN tar -xvf Deadline-${DEADLINE_VERSION}-linux-installers.tar
 RUN mkdir ~/certs
 
 
-RUN apt-get install -y netcat lsb
+RUN apt-get install -y lsb-core
 
 ADD ./client_entrypoint.sh .
 RUN dos2unix ./client_entrypoint.sh && chmod u+x ./client_entrypoint.sh
