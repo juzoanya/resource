@@ -5,9 +5,6 @@ FROM mongo:4.4
 ENV MONGO_INITDB_ROOT_USERNAME=admin
 ENV MONGO_INITDB_ROOT_PASSWORD=password
 
-# Expose default MongoDB port
-EXPOSE 27017
-
 # Volumes for persistent data
 VOLUME ["/data/db"]
 

@@ -8,18 +8,25 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install Deadline RCS
-RUN wget https://downloads.thinkboxsoftware.com/DeadlineClient-<version>.linux \
-    -O /tmp/deadline-rcs-installer.run && \
-    chmod +x /tmp/deadline-rcs-installer.run
+# RUN wget https://downloads.thinkboxsoftware.com/DeadlineClient-<version>.linux \
+#     -O /tmp/deadline-rcs-installer.run && \
+#     chmod +x /tmp/deadline-rcs-installer.run
 
-RUN /tmp/deadline-rcs-installer.run --mode unattended --installto /opt/Thinkbox/Deadline10
+# Copy installer file
+COPY ../DeadlineClient-10.3.2.1-linux-x64-installer.run /tmp/deadline-rcs-installer.run
+RUN chmod +x /tmp/deadline-rcs-installer.run
+
+RUN /tmp/deadline-rcs-installer.run --mode unattended
 
 # Copy the SSL certificates into the container
 COPY ./certs/rcs.crt /opt/Thinkbox/Deadline10/certs/rcs.crt
 COPY ./certs/rcs.key /opt/Thinkbox/Deadline10/certs/rcs.key
 
-# Expose required RCS ports
-EXPOSE 4433 8080
+ADD ./entrypoint.sh .
+RUN dos2unix ./client_entrypoint.sh && chmod u+x ./client_entrypoint.sh
+
+
+ENTRYPOINT [ "./entrypoint.sh" ]
 
 # Command to start the Deadline RCS with SSL certificates
 CMD ["/opt/Thinkbox/Deadline10/bin/deadlinercs", "--sslCertificate=/opt/Thinkbox/Deadline10/certs/rcs.crt", "--sslPrivateKey=/opt/Thinkbox/Deadline10/certs/rcs.key"]

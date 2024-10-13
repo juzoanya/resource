@@ -8,6 +8,14 @@ WORKER_BIN=/opt/Thinkbox/Deadline10/bin/deadlineworker
 FORWARDER_BIN=/opt/Thinkbox/Deadline10/bin/deadlinelicenseforwarder
 DEADLINE_CMD=/opt/Thinkbox/Deadline10/bin/deadlinecommand
 
+until nc -z -v -w30 deadline-db 27100
+do
+  echo "Waiting for MongoDB database connection..."
+  sleep 5
+done
+
+echo "MongoDB is up and running. Proceeding with the Deadline Repository installation."
+
 configure_from_env () {
     if [[ -z "$DEADLINE_REGION" ]]; then
         $DEADLINE_CMD SetIniFileSetting Region $DEADLINE_REGION
@@ -31,9 +39,9 @@ install_repository () {
         --dbcertpass $DB_CERT_PASS \
         --dbssl true
 
-        echo "Install Custom Elements from https://github.com/postwork-io/custom.git"
-        git clone https://github.com/postwork-io/custom.git
-        rsync --ignore-existing -raz ./custom /repo
+        # echo "Install Custom Elements from https://github.com/postwork-io/custom.git"
+        # git clone https://github.com/postwork-io/custom.git
+        # rsync --ignore-existing -raz ./custom /repo
 
     else
         echo "Repository Already Installed"
@@ -63,6 +71,8 @@ download_additional_installers () {
     wait
 }
 
+echo "PERFORMING CLEANUP..."
+
 cleanup_installer () {
     rm /build/Deadline*
     rm /build/AWSPortalLink*
@@ -73,7 +83,7 @@ if [ "$1" == "rcs" ]; then
     
     install_repository
 
-    echo "Deadline Remote Connection Server"
+    echo "DEADLINE REMOTE CONNECTION SERVER............"
     if [ -e "$RCS_BIN" ]; then
 
         /bin/bash -c "$RCS_BIN"

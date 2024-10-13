@@ -7,16 +7,20 @@ ARG DEADLINE_INSTALLER_BASE
 ARG CERT_ORG
 ARG CERT_OU
 
-FROM ubuntu:18.04 as base
+FROM ubuntu:20.04 AS base
+
+ENV TZ=Europe/Berlin
 
 WORKDIR /build
 
-RUN apt-get update && apt-get install -y curl dos2unix python python-pip git
+RUN apt-get update && apt-get install -y curl dos2unix python3 python3-pip git tzdata locales &&\
+    ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime &&\
+    dpkg-reconfigure --frontend noninteractive tzdata
 
 
 
 
-FROM base as db
+FROM base AS db
 
 ARG DB_CERT_PASS
 ARG SECRETS_USERNAME
@@ -31,12 +35,12 @@ RUN mkdir ~/keys
 
 #Generate Certificates
 RUN git clone https://github.com/ThinkboxSoftware/SSLGeneration.git &&\
-    pip install pyopenssl==17.5.0
+    pip3 install pyopenssl==24.0.0
 
-RUN python ./SSLGeneration/ssl_gen.py --ca --cert-org ${CERT_ORG} --cert-ou ${CERT_OU} --keys-dir ~/keys &&\
-    python ./SSLGeneration/ssl_gen.py --server --cert-name ${DB_HOST} --alt-name localhost --alt-name 127.0.0.1 --keys-dir ~/keys &&\
-    python ./SSLGeneration/ssl_gen.py --client --cert-name deadline-client --keys-dir ~/keys &&\
-    python ./SSLGeneration/ssl_gen.py --pfx --cert-name deadline-client --keys-dir ~/keys --passphrase ${DB_CERT_PASS} &&\
+RUN python3 ./SSLGeneration/ssl_gen.py --ca --cert-org ${CERT_ORG} --cert-ou ${CERT_OU} --keys-dir ~/keys &&\
+    python3 ./SSLGeneration/ssl_gen.py --server --cert-name ${DB_HOST} --alt-name localhost --alt-name 127.0.0.1 --keys-dir ~/keys &&\
+    python3 ./SSLGeneration/ssl_gen.py --client --cert-name deadline-client --keys-dir ~/keys &&\
+    python3 ./SSLGeneration/ssl_gen.py --pfx --cert-name deadline-client --keys-dir ~/keys --passphrase ${DB_CERT_PASS} &&\
     cat ~/keys/${DB_HOST}.crt ~/keys/${DB_HOST}.key > ~/keys/mongodb.pem
 
 
@@ -61,7 +65,7 @@ ENTRYPOINT [ "./database_entrypoint.sh" ]
 
 
 
-FROM base as client
+FROM base AS client
 
 ARG DEADLINE_VERSION
 ARG DEADLINE_INSTALLER_BASE
@@ -74,7 +78,7 @@ RUN tar -xvf Deadline-${DEADLINE_VERSION}-linux-installers.tar
 RUN mkdir ~/certs
 
 
-RUN apt-get install -y lsb
+RUN apt-get install -y netcat lsb
 
 ADD ./client_entrypoint.sh .
 RUN dos2unix ./client_entrypoint.sh && chmod u+x ./client_entrypoint.sh

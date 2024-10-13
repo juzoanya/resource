@@ -8,14 +8,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install Deadline Web Service
-RUN wget https://downloads.thinkboxsoftware.com/DeadlineClient-<version>.linux \
-    -O /tmp/deadline-web-installer.run && \
-    chmod +x /tmp/deadline-web-installer.run
+# RUN wget https://downloads.thinkboxsoftware.com/DeadlineClient-<version>.linux \
+#     -O /tmp/deadline-web-installer.run && \
+#     chmod +x /tmp/deadline-web-installer.run
 
-RUN /tmp/deadline-web-installer.run --mode unattended --installto /opt/Thinkbox/Deadline10
+# Copy installer file
+COPY ../DeadlineClient-10.3.2.1-linux-x64-installer.run /tmp/deadline-web-installer.run
+RUN chmod +x /tmp/deadline-web-installer.run
 
-# Expose required web ports
-EXPOSE 8082
+RUN /tmp/deadline-web-installer.run --mode unattended
 
 # Volumes for persistent configuration
 VOLUME ["/opt/Thinkbox/Deadline10"]

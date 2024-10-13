@@ -13,19 +13,19 @@ services:
     ports:
       - "27017:27017"
 
-  repo:
-    build:
-      dockerfile: ./repo/Dockerfile
-    container_name: deadline_repo
-    volumes:
-      - ./deadline_repo:/opt/Thinkbox/DeadlineRepository10
-    depends_on:
-      - db
-    networks:
-      - deadline_network
-    ports:
-      - "8080:8080"
-      - "4433:4433"
+  # repo:
+  #   build:
+  #     dockerfile: ./repo/Dockerfile
+  #   container_name: deadline_repo
+  #   volumes:
+  #     - ./deadline_repo:/opt/Thinkbox/DeadlineRepository10
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - deadline_network
+  #   ports:
+  #     - "8080:8080"
+  #     - "4433:4433"
 
   rcs:
     build:
@@ -35,7 +35,7 @@ services:
       - ./deadline_rcs:/opt/Thinkbox/Deadline10
       - ./certs:/opt/Thinkbox/Deadline10/certs  # Mount the certificate directory
     depends_on:
-      - repo
+      - db
     networks:
       - deadline_network
     ports:
