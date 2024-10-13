@@ -83,7 +83,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG DEADLINE_VERSION
 ARG DEADLINE_INSTALLER_BASE
 
-
+RUN echo "tzdata tzdata/Areas select Europe" | debconf-set-selections && \
+    echo "tzdata tzdata/Zones/Europe select Berlin" | debconf-set-selections
 
 COPY ./Deadline-10.3.2.1-linux-installers.tar .
 RUN pip install awscli
